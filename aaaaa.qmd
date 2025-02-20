@@ -2,6 +2,7 @@
 title: "Group K Initial Commit"
 format: html
 editor: visual
+author: Jack Vogel,
 ---
 
 ## Quarto
