@@ -1,27 +1,41 @@
 ---
 title: "Group K Initial Commit"
-format: html
-editor: visual
 author: Jack Vogel, Troy Volpentest, Diego Nieves
+format: 
+  html:
+    embed-resources: true
+    code-tools: true
+    toc: true
+editor: source
+execute: 
+  error: true
+  echo: true
+  message: false
+  warning: false
 ---
 
-## Quarto
+[Download PlaneCrashAffected_AnnualNumber.csv data](../stat331-finalproject/PlaneCrashAffected_AnnualNumber.csv)
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+[Download PlaneCrashDeath_AnnualNumber.csv data](../stat331-finalproject/PlaneCrashDeath_AnnualNumber.csv)
 
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
-```{r}
-1 + 1
+```{r setup}
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+planeCrashAffected <- read.csv("PlaneCrashAffected_AnnualNumber.csv")
+planeCrashDeaths <- read.csv("PlaneCrashDeath_AnnualNumber.csv")
 ```
 
-You can add options to executable code like this
+```{r cleanup}
+colnames(planeCrashAffected) <- str_remove(colnames(planeCrashAffected), "^X")
+colnames(planeCrashDeaths) <- str_remove(colnames(planeCrashDeaths), "^X")
 
-```{r}
-#| echo: false
-2 * 2
+
+cleanPCAffected <- planeCrashAffected |>
+  drop_na()|>
+  filter(rowMeans(across(-country)) >= 3)
+
+cleanPCDeaths <- planeCrashDeaths |>
+  drop_na()
+
 ```
-
-The `echo: false` option disables the printing of code (only output is displayed).
