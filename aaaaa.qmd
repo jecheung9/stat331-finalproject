@@ -1,6 +1,6 @@
 ---
-title: "Group K Initial Commit"
-author: Jack Vogel, Troy Volpentest, Diego Nieves
+title: "Group K Final Project"
+author: Jack Vogel, Troy Volpentest, Diego Nieves, Jeffrey Cheung
 format: 
   html:
     embed-resources: true
@@ -14,6 +14,8 @@ execute:
   warning: false
 ---
 
+# Section 1: Project Proposal + Data
+
 [Download PlaneCrashAffected_AnnualNumber.csv data](../stat331-finalproject/PlaneCrashAffected_AnnualNumber.csv)
 
 [Download PlaneCrashDeath_AnnualNumber.csv data](../stat331-finalproject/PlaneCrashDeath_AnnualNumber.csv)
@@ -26,6 +28,7 @@ planeCrashAffected <- read.csv("PlaneCrashAffected_AnnualNumber.csv")
 planeCrashDeaths <- read.csv("PlaneCrashDeath_AnnualNumber.csv")
 ```
 
+## 1.1 Data Cleaning
 ```{r cleanup}
 colnames(planeCrashAffected) <- str_remove(colnames(planeCrashAffected), "^X")
 colnames(planeCrashDeaths) <- str_remove(colnames(planeCrashDeaths), "^X")
@@ -39,3 +42,26 @@ cleanPCDeaths <- planeCrashDeaths |>
   drop_na()
 
 ```
+
+## 1.2 Pivoting Longer
+```{r pivoting}
+PCAffectedLong <- cleanPCAffected |>
+  pivot_longer(cols = -country,
+               names_to = "year",
+               values_to = "num_people_affected")
+
+PCDeathsLong <- cleanPCDeaths |>
+  pivot_longer(cols = -country,
+               names_to = "year",
+               values_to = "num_people_deaths")
+
+
+```
+
+## 1.3 Joining Datasets
+```{r join}
+JoinedData <- PCAffectedLong |>
+  inner_join(PCDeathsLong, by = c("country", "year"))
+
+```
+
