@@ -18,42 +18,34 @@ execute:
 
 [Download PlaneCrashAffected_AnnualNumber.csv data](../stat331-finalproject/PlaneCrashAffected_AnnualNumber.csv)
 
-[Download PlaneCrashDeath_AnnualNumber.csv data](../stat331-finalproject/PlaneCrashDeath_AnnualNumber.csv)
+[Download freedix_fh.csv data](../stat331-finalproject/freedix_fh.csv)
 
 ```{r setup}
 library(tidyverse)
 library(knitr)
 library(kableExtra)
 planeCrashAffected <- read.csv("PlaneCrashAffected_AnnualNumber.csv")
-planeCrashDeaths <- read.csv("PlaneCrashDeath_AnnualNumber.csv")
+FH <- read.csv("freedix_fh.csv")
 ```
 
 ## 1.1 Data Cleaning
 ```{r cleanup}
 colnames(planeCrashAffected) <- str_remove(colnames(planeCrashAffected), "^X")
-colnames(planeCrashDeaths) <- str_remove(colnames(planeCrashDeaths), "^X")
-
-
-cleanPCAffected <- planeCrashAffected |>
-  drop_na()|>
-  filter(rowMeans(across(-country)) >= 3)
-
-cleanPCDeaths <- planeCrashDeaths |>
-  drop_na()
+colnames(FH) <- str_remove(colnames(FH), "^X")
 
 ```
 
 ## 1.2 Pivoting Longer
 ```{r pivoting}
-PCAffectedLong <- cleanPCAffected |>
+PCAffectedLong <- planeCrashAffected |>
   pivot_longer(cols = -country,
                names_to = "year",
                values_to = "num_people_affected")
 
-PCDeathsLong <- cleanPCDeaths |>
+FHLong <- FH |>
   pivot_longer(cols = -country,
                names_to = "year",
-               values_to = "num_people_deaths")
+               values_to = "FH")
 
 
 ```
@@ -61,7 +53,7 @@ PCDeathsLong <- cleanPCDeaths |>
 ## 1.3 Joining Datasets
 ```{r join}
 JoinedData <- PCAffectedLong |>
-  inner_join(PCDeathsLong, by = c("country", "year"))
+  inner_join(FHLong, by = c("country", "year"))
 
 ```
 
