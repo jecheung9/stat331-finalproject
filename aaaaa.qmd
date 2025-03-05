@@ -27,6 +27,7 @@ library(tidyverse)
 library(gganimate)
 library(knitr)
 library(kableExtra)
+library(broom)
 planeCrashAffected <- read.csv("PlaneCrashAffected_AnnualNumber.csv")
 FH <- read.csv("freedix_fh.csv")
 ```
@@ -117,16 +118,19 @@ summary(countryAverages_lm)
 
 ### 2.3 Model Fit
 ```{r}
-ssresid <- sum((countryAverages_lm$residuals)^ 2)
-ssreg <- sum((countryAverages_lm$fitted.values) ^ 2)
-sstotal <- ssresid + ssreg
+ssresid <- var(countryAverages_lm$residuals)
+ssreg <- var(countryAverages_lm$fitted.values)
+sstotal <- broom::augment(countryAverages_lm) |>
+  select(avg_people_affected) |>
+  var()
+
 
 modelfit <- c(
-  "SSResidual" = ssresid,
-  "SSRegression" = ssreg,
-  "SSTotal" = sstotal) |> 
-  enframe(name = "Statistic", value = "Value") |>
-  mutate(Proportion = Value / sstotal)
+  "Residual" = ssresid,
+  "Regression" = ssreg,
+  "Response" = sstotal) |> 
+  enframe(name = "Statistic", value = "Variance") |>
+  mutate(Proportion = Variance / sstotal)
 
 modelfit |>
   kable(caption = "Variability in Plane Crash Affectees") |> 
