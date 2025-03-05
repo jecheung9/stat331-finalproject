@@ -6,6 +6,8 @@ format:
     embed-resources: true
     code-tools: true
     toc: true
+    code-fold: true
+    html-table-processing: none
 editor: source
 execute: 
   error: true
@@ -58,13 +60,11 @@ JoinedData <- PCAffectedLong |>
 
 ```
 
-### Section 1 Written Component
-
 In this analysis, we use data from the Freedom House Organization’s Freedom Index which is an aggregate score representing a country’s political and civil freedoms in a given year. A country’s freedom score is based on a scale from 1(most free) to 7(least free). The political rights section of a country’s Freedom Index score is based on their electoral process, political pluralism and participation. The civil liberties category is based on the people’s Freedom of Expression and Belief, Associational and Organizational Rights, Rule of Law and Personal Autonomy and Individual Rights. We also use data from the Plane Crash Affected Annual Number dataset from gapminder. This dataset includes information on the total number of people affected, injured or killed in air accidents during the given year.  
 
-Our analysis includes the years 1972 – 2008 with 121 countries represented. Each country in a given year is an observational unit.  
+Our analysis includes the years 1972 – 2008 with 121 countries represented. Each country in a given year is an observational unit. We expect that there could be a correlation between high FH values (less freedom) and the number of people affected by plane crashes. Hypothetically, more political freedom would lead to more safety accountability. There is a positive correlation; higher FH values should mean more plane crashes.
 
-We expect that there could be a correlation between high FH values (low degrees of freedom) and the number of people affected by plane crashes. Hypothetically, more political freedom would lead to more safety accountability. 
+For our data cleaning, each year column began with "^X" (eg. "^X1993"), which we removed. FH goes from 1972 to 2020, while plane crash data goes from 1970 to 2008, so our final dataset uses years from 1972 to 2008.
 
 ## Section 2: Linear Regression
 
@@ -119,4 +119,22 @@ summary(countryAverages_lm)
 
 ```
 
+### 2.3 Model Fit
+```{r}
+ssresid <- sum((countryAverages_lm$residuals)^ 2)
+ssreg <- sum((countryAverages_lm$fitted.values) ^ 2)
+sstotal <- ssresid + ssreg
+
+modelfit <- c(
+  "SSResidual" = ssresid,
+  "SSRegression" = ssreg,
+  "SSTotal" = sstotal) |> 
+  enframe(name = "Statistic", value = "Value") |>
+  mutate(Proportion = Value / sstotal)
+
+modelfit |>
+  kable(caption = "Variability in Plane Crash Affectees") |> 
+  kable_styling(bootstrap_options = c("striped", "condensed"), full_width = F)
+
+```
 
