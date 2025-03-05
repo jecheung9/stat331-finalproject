@@ -36,6 +36,7 @@ FH <- read.csv("freedix_fh.csv")
 colnames(planeCrashAffected) <- str_remove(colnames(planeCrashAffected), "^X")
 colnames(FH) <- str_remove(colnames(FH), "^X")
 
+
 ```
 
 ### 1.2 Pivoting Longer
@@ -113,6 +114,8 @@ countryAverages <- JoinedData |>
 
 
 countryAverages_lm <- lm(avg_people_affected ~ avg_FH, data = countryAverages)
+
+ggplot(countryAverages, aes(x = avg_FH, y = avg_people_affected)) + geom_point() + geom_smooth(method = "lm")
 
 
 summary(countryAverages_lm)
