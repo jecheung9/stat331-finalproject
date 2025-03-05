@@ -75,22 +75,26 @@ For our data cleaning, each year column began with "^X" (eg. "^X1993"), which we
 JoinedData <- JoinedData |> 
   drop_na(FH, num_people_affected)
 
-ggplot(JoinedData, aes(x = FH, y = num_people_affected)) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  #scale_y_continuous(limits = c(0, 1)) +
-  labs(title = "Political Freedom & Plane Crashes",
-       subtitle = "Plane Crashes By Affectees",
-       x = "Freedom Index",
-       y = ""
-       )+
-  theme_minimal()
+countryAverages <- JoinedData |>
+  group_by(country) |>
+  summarize(avg_FH = mean(FH, na.rm = TRUE),
+            avg_people_affected = mean(num_people_affected, na.rm = TRUE))
+
+
+
+ggplot(countryAverages,
+       aes(x = avg_FH, y = avg_people_affected))+ 
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  labs(title = "Political Freedom & Plane Crashes (1972 - 2022)", 
+       subtitle = "Average Plane Crash Affectees", 
+       x = "Average Freedom Index", y = "")
 ```
 
 
 ```{r}
 JoinedData |>
-  mutate(decade = floor(as.numeric(year) / 10) * 10) |>
+  mutate(decade = paste0(floor(as.numeric(year) / 10) * 10, "s")) |>  
   
   ggplot(aes(x = FH, y = num_people_affected, color = as.factor(decade))) +
   geom_smooth(method = "lm", se = FALSE) +
@@ -107,19 +111,8 @@ JoinedData |>
 
 ```{r}
 
-countryAverages <- JoinedData |>
-  group_by(country) |>
-  summarize(avg_FH = mean(FH, na.rm = TRUE),
-            avg_people_affected = mean(num_people_affected, na.rm = TRUE))
-
-
 countryAverages_lm <- lm(avg_people_affected ~ avg_FH, data = countryAverages)
-
-ggplot(countryAverages, aes(x = avg_FH, y = avg_people_affected)) + geom_point() + geom_smooth(method = "lm")
-
-
 summary(countryAverages_lm)
-
 ```
 
 ### 2.3 Model Fit
