@@ -4,5 +4,7 @@
 .Ruserdata
 stat331-finalproject.Rproj
 *.Rproj
-aaaaa_files/*
 *.html
+.DS_Store
+aaaaa_files/*
+
