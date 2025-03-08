@@ -138,3 +138,27 @@ modelfit |>
 
 ```
 
+
+Graph 1 
+
+This graph shows the relationship between a country's average Freedom Index and the average number of people affected by plane crashes from 1972 to 2022. As stated before, the Freedom Index ranges from 1 (most free) to 7 (least free). Each point represents one country. The graph does contain outliers that have high numbers of affected individuals in plane crashes, but overall, with many of the points averaging around zero, the trend line stays around there which suggests a pretty weak relationship between political freedom and plane crashes.  
+
+
+Graph 2 
+
+Now this graph illustrates the same relationship except it demonstrates throughout decades. (1970s–2000s). The trends vary significantly, as the 1970s and 1980s show a ‘negative’ correlation, more freedom associated with more crash victims, while the 1990s and 2000s exhibit a ‘positive’ correlation less freedom associated with more crash victims. The opposing trends do suggest a correlation that the relationship has changed over time, but with the lines varying greatly, it could just be a coincidence. 
+
+The statistical method used is a linear regression model, which applies a best fit line to our explanatory variable, average number of people affected by plane crashes, and our response variable, the average freedom index. 
+
+Our estimated regression model is y = 12.07 – 0.447x 
+
+Intercept: 12.07 
+
+When the average freedom index is 0, the predicted number of people affected is 12.07 
+
+Slope: -0.447 
+
+For each one unit increase in average freedom index score, the predicted average number of people affected decreases by 0.447 
+
+
+The regression model shows a very weak correlation between a country’s average freedom house score and the average number of people affected by plane crashes each year. Our R^2 is 0.0024 which means that only 0.24% of the variance in the average number of people affected by plane crashes is explained by the Freedom House Index. Our p-value of 0.596 indicates that a country’s average Freedom House Index score is not an accurate predictor of their average number of people affected by plane crashes. 
