@@ -86,7 +86,6 @@ countryAverages <- JoinedData |>
 ggplot(countryAverages,
        aes(x = avg_FH, y = avg_people_affected))+ 
   geom_point() + 
-  geom_smooth(method = "lm") + 
   labs(title = "Political Freedom & Plane Crashes (1972 - 2022)", 
        subtitle = "Average Plane Crash Affectees", 
        x = "Average Freedom Index", y = "")
@@ -99,7 +98,7 @@ JoinedData |>
   
   ggplot(aes(x = FH, y = num_people_affected, color = as.factor(decade))) +
   geom_smooth(method = "lm", se = FALSE) +
-  labs(title = "Political Freedom & Plane Crash by Decade",
+  labs(title = "Estimated Lines of Political Freedom & Plane Crash by Decade",
        subtitle = "Plane Crashes Affectees",
        x = "Freedom Index",
        y = "",
@@ -115,8 +114,15 @@ Now this graph illustrates the same relationship except it demonstrates througho
 
 ```{r}
 
+ggplot(countryAverages,
+       aes(x = avg_FH, y = avg_people_affected))+ 
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  labs(title = "Political Freedom & Plane Crashes With Regression Line (1972 - 2022)", 
+       subtitle = "Average Plane Crash Affectees", 
+       x = "Average Freedom Index", y = "")
+
 countryAverages_lm <- lm(avg_people_affected ~ avg_FH, data = countryAverages)
-summary(countryAverages_lm)
 ```
 
 The statistical method used is a linear regression model, which applies a best fit line to our explanatory variable, average number of people affected by plane crashes, and our response variable, the average freedom index. 
