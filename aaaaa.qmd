@@ -123,9 +123,13 @@ ggplot(countryAverages,
        x = "Average Freedom Index", y = "")
 
 countryAverages_lm <- lm(avg_people_affected ~ avg_FH, data = countryAverages)
+tidy_lm <- broom::tidy(countryAverages_lm)
+
+intercept <- round(tidy_lm$estimate[1], 2)
+slope <- round(tidy_lm$estimate[2], 3)
 ```
 
-We used a linear regression model, which applies a best fit line to our explanatory variable, average number of people affected by plane crashes(x), and our response variable, the average freedom index(y). Our estimated regression model is y = 12.07 – 0.447x. Our intercept of 12.07 tells us that when a country’s freedom index is 0, the predicted number of people affected by plane crashes per year is 12.07. Our slope of -0.447 tells us that for each one unit increase in average freedom index score, the predicted average number of people affected by plane crashes per year decreases by 0.447.
+We used a linear regression model, which applies a best fit line to our explanatory variable, average number of people affected by plane crashes(x), and our response variable, the average freedom index(y). Our estimated regression model is y = `r intercept` `r slope`x. Our intercept of `r intercept` tells us that when a country’s freedom index is 0, the predicted number of people affected by plane crashes per year is `r intercept`. Our slope of `r slope` tells us that for each one unit increase in average freedom index score, the predicted average number of people affected by plane crashes per year decreases by `r slope * -1`.
 
 ### 2.3 Model Fit
 ```{r}
@@ -147,9 +151,14 @@ modelfit |>
   kable(caption = "Variability in Plane Crash Affectees") |> 
   kable_styling(bootstrap_options = c("striped", "condensed"), full_width = F)
 
+glance_lm <- glance(countryAverages_lm)
+p_value <- round(glance_lm$p.value, 3)
+r_squared <- round(glance_lm$r.squared, 4)
+
+
 ```
 
-The regression model shows a very weak correlation between a country’s average freedom house score and the average number of people affected by plane crashes each year. Our R^2 is 0.0024 which means that only 0.24% of the variance in the average number of people affected by plane crashes is explained by the Freedom House Index. Our p-value of 0.596 indicates that a country’s average Freedom House Index score is not an accurate predictor of their average number of people affected by plane crashes. 
+The regression model shows a very weak correlation between a country’s average freedom house score and the average number of people affected by plane crashes each year. Our R^2 is `r r_squared` which means that only `r r_squared * 100`% of the variance in the average number of people affected by plane crashes is explained by the Freedom House Index. Our p-value of `r p_value` indicates that a country’s average Freedom House Index score is not an accurate predictor of their average number of people affected by plane crashes. 
 
 ## Section 3: Simulation
 ### 3.1 Visualizing Simulations from the Model
