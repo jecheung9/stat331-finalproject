@@ -189,7 +189,7 @@ ggplot(longSimulation, aes(x = avg_FH, y = num_people_affected, color = Type)) +
   labs(title = "Observed vs Simulated Data",
        subtitle = "Average Plane Crash Affectees",
        x = "Average Freedom Index",
-       y = "
+       y = "") +
   theme_minimal()
 ```
 
