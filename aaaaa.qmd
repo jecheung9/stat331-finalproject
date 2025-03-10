@@ -125,17 +125,7 @@ ggplot(countryAverages,
 countryAverages_lm <- lm(avg_people_affected ~ avg_FH, data = countryAverages)
 ```
 
-The statistical method used is a linear regression model, which applies a best fit line to our explanatory variable, average number of people affected by plane crashes, and our response variable, the average freedom index. 
-
-Our estimated regression model is y = 12.07 – 0.447x 
-
-Intercept: 12.07 
-
-When the average freedom index is 0, the predicted number of people affected is 12.07 
-
-Slope: -0.447 
-
-For each one unit increase in average freedom index score, the predicted average number of people affected decreases by 0.447 
+We used a linear regression model, which applies a best fit line to our explanatory variable, average number of people affected by plane crashes(x), and our response variable, the average freedom index(y). Our estimated regression model is y = 12.07 – 0.447x. Our intercept of 12.07 tells us that when a country’s freedom index is 0, the predicted number of people affected by plane crashes per year is 12.07. Our slope of -0.447 tells us that for each one unit increase in average freedom index score, the predicted average number of people affected by plane crashes per year decreases by 0.447.
 
 ### 2.3 Model Fit
 ```{r}
@@ -192,4 +182,45 @@ ggplot(longSimulation, aes(x = avg_FH, y = num_people_affected, color = Type)) +
        y = "") +
   theme_minimal()
 ```
+The simple regression line of our simulated data shows a steeper negative relationship between a country’s Average Freedom Index score and their average number of people affected by plane crashes per year than our observed data shows. However, our simulated data also shows many countries with negative values for average number of people affected by plane crashes per year which, in reality, is not possible. Our simulated data also has fewer extreme outliers than our observed data does. 
+
+### 3.2 Generating Multiple Predictive Checks
+```{r}
+noise <- function(x, mean = 0, sd){
+  x + rnorm(length(x), mean, sd)
+}
+
+sims <- map_dfc(.x = 1:1000,
+                .f = ~ tibble(sim = noise(prediction, 
+                                          sd = sigma(countryAverages_lm))))
+
+colnames(sims) <- colnames(sims) |> 
+  str_replace(pattern = "\\.\\.\\.",
+                  replace = "_")
+
+sims <- countryAverages |> 
+  select(avg_people_affected) |> 
+  bind_cols(sims)
+
+sims_r_sq <- sims |> 
+  map(~ lm(avg_people_affected ~ .x, data = sims)) |>
+  map(glance) |> 
+  map_dbl(~ .x$r.squared)
+
+sims_r_sq <- sims_r_sq[names(sims_r_sq) != "avg_people_affected"]
+
+tibble(sims = sims_r_sq) |> 
+  ggplot(aes(x = sims)) + 
+  geom_histogram() +
+  labs(x = expression("Simulated"~ R^2),
+       y = "",
+       subtitle = "Number of Simulated Models") +
+  theme_bw()
+
+mean_r2 <- round(mean(sims_r_sq), 4) * 100 
+
+
+# https://manncz.github.io/stat331-calpoly-text/10-predictive-checks.html#iterating
+```
+We can see that the simulated datasets have most r-squared values near 0. This means that the simulations are very dissimilar to the observed data. On average, our simulated data accounts for about `r mean_r2`% of the variability in the observed average people affected in plane crashes.
 
