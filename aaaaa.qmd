@@ -6,6 +6,8 @@ format:
     embed-resources: true
     code-tools: true
     toc: true
+    code-fold: true
+    html-table-processing: none
 editor: source
 execute: 
   error: true
@@ -25,6 +27,7 @@ library(tidyverse)
 library(gganimate)
 library(knitr)
 library(kableExtra)
+library(broom)
 planeCrashAffected <- read.csv("PlaneCrashAffected_AnnualNumber.csv")
 FH <- read.csv("freedix_fh.csv")
 ```
@@ -33,6 +36,7 @@ FH <- read.csv("freedix_fh.csv")
 ```{r cleanup}
 colnames(planeCrashAffected) <- str_remove(colnames(planeCrashAffected), "^X")
 colnames(FH) <- str_remove(colnames(FH), "^X")
+
 
 ```
 
@@ -58,13 +62,11 @@ JoinedData <- PCAffectedLong |>
 
 ```
 
-### Section 1 Written Component
-
 In this analysis, we use data from the Freedom House Organization’s Freedom Index which is an aggregate score representing a country’s political and civil freedoms in a given year. A country’s freedom score is based on a scale from 1(most free) to 7(least free). The political rights section of a country’s Freedom Index score is based on their electoral process, political pluralism and participation. The civil liberties category is based on the people’s Freedom of Expression and Belief, Associational and Organizational Rights, Rule of Law and Personal Autonomy and Individual Rights. We also use data from the Plane Crash Affected Annual Number dataset from gapminder. This dataset includes information on the total number of people affected, injured or killed in air accidents during the given year.  
 
-Our analysis includes the years 1972 – 2008 with 121 countries represented. Each country in a given year is an observational unit.  
+Our analysis includes the years 1972 – 2008 with 121 countries represented. Each country in a given year is an observational unit. We expect that there could be a correlation between high FH values (less freedom) and the number of people affected by plane crashes. Hypothetically, more political freedom would lead to more safety accountability. There is a positive correlation; higher FH values should mean more plane crashes.
 
-We expect that there could be a correlation between high FH values (low degrees of freedom) and the number of people affected by plane crashes. Hypothetically, more political freedom would lead to more safety accountability. 
+For our data cleaning, each year column began with "^X" (eg. "^X1993"), which we removed. FH goes from 1972 to 2020, while plane crash data goes from 1970 to 2008, so our final dataset uses years from 1972 to 2008.
 
 ## Section 2: Linear Regression
 
@@ -74,22 +76,26 @@ We expect that there could be a correlation between high FH values (low degrees 
 JoinedData <- JoinedData |> 
   drop_na(FH, num_people_affected)
 
-ggplot(JoinedData, aes(x = FH, y = num_people_affected)) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  #scale_y_continuous(limits = c(0, 1)) +
-  labs(title = "Political Freedom & Plane Crashes",
-       subtitle = "Plane Crashes By Affectees",
-       x = "Freedom Index",
-       y = ""
-       )+
-  theme_minimal()
-```
+countryAverages <- JoinedData |>
+  group_by(country) |>
+  summarize(avg_FH = mean(FH, na.rm = TRUE),
+            avg_people_affected = mean(num_people_affected, na.rm = TRUE))
 
+
+
+ggplot(countryAverages,
+       aes(x = avg_FH, y = avg_people_affected))+ 
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  labs(title = "Political Freedom & Plane Crashes (1972 - 2022)", 
+       subtitle = "Average Plane Crash Affectees", 
+       x = "Average Freedom Index", y = "")
+```
+This graph shows the relationship between a country's average Freedom Index and the average number of people affected by plane crashes from 1972 to 2022. As stated before, the Freedom Index ranges from 1 (most free) to 7 (least free). Each point represents one country. The graph does contain outliers that have high numbers of affected individuals in plane crashes, but overall, with many of the points averaging around zero, the trend line stays around there which suggests a pretty weak relationship between political freedom and plane crashes.  
 
 ```{r}
 JoinedData |>
-  mutate(decade = floor(as.numeric(year) / 10) * 10) |>
+  mutate(decade = paste0(floor(as.numeric(year) / 10) * 10, "s")) |>  
   
   ggplot(aes(x = FH, y = num_people_affected, color = as.factor(decade))) +
   geom_smooth(method = "lm", se = FALSE) +
@@ -102,21 +108,82 @@ JoinedData |>
 
 
 ```
+Now this graph illustrates the same relationship except it demonstrates throughout decades. (1970s–2000s). The trends vary significantly, as the 1970s and 1980s show a ‘negative’ correlation, more freedom associated with more crash victims, while the 1990s and 2000s exhibit a ‘positive’ correlation less freedom associated with more crash victims. The opposing trends do suggest a correlation that the relationship has changed over time, but with the lines varying greatly, it could just be a coincidence. 
+
+
 ### 2.2 Linear Regression
 
 ```{r}
 
-countryAverages <- JoinedData |>
-  group_by(country) |>
-  summarize(avg_FH = mean(FH, na.rm = TRUE),
-            avg_people_affected = mean(num_people_affected, na.rm = TRUE))
-
-
 countryAverages_lm <- lm(avg_people_affected ~ avg_FH, data = countryAverages)
-
-
 summary(countryAverages_lm)
+```
+
+The statistical method used is a linear regression model, which applies a best fit line to our explanatory variable, average number of people affected by plane crashes, and our response variable, the average freedom index. 
+
+Our estimated regression model is y = 12.07 – 0.447x 
+
+Intercept: 12.07 
+
+When the average freedom index is 0, the predicted number of people affected is 12.07 
+
+Slope: -0.447 
+
+For each one unit increase in average freedom index score, the predicted average number of people affected decreases by 0.447 
+
+### 2.3 Model Fit
+```{r}
+ssresid <- var(countryAverages_lm$residuals)
+ssreg <- var(countryAverages_lm$fitted.values)
+sstotal <- broom::augment(countryAverages_lm) |>
+  select(avg_people_affected) |>
+  var()
+
+
+modelfit <- c(
+  "Residual" = ssresid,
+  "Regression" = ssreg,
+  "Response" = sstotal) |> 
+  enframe(name = "Statistic", value = "Variance") |>
+  mutate(Proportion = Variance / sstotal)
+
+modelfit |>
+  kable(caption = "Variability in Plane Crash Affectees") |> 
+  kable_styling(bootstrap_options = c("striped", "condensed"), full_width = F)
 
 ```
 
+The regression model shows a very weak correlation between a country’s average freedom house score and the average number of people affected by plane crashes each year. Our R^2 is 0.0024 which means that only 0.24% of the variance in the average number of people affected by plane crashes is explained by the Freedom House Index. Our p-value of 0.596 indicates that a country’s average Freedom House Index score is not an accurate predictor of their average number of people affected by plane crashes. 
+
+## Section 3: Simulation
+### 3.1 Visualizing Simulations from the Model
+
+```{r}
+set.seed(369) 
+prediction <- predict(countryAverages_lm)
+
+simValues <- prediction + rnorm(length(prediction), mean = 0, sd = sigma(countryAverages_lm))
+
+
+simulation <- tibble(
+  avg_FH = countryAverages$avg_FH,
+  observed = countryAverages$avg_people_affected,
+  simulated = simValues
+)
+
+longSimulation <- simulation |> 
+  pivot_longer(cols = c("observed", "simulated"), 
+               names_to = "Type", 
+               values_to = "num_people_affected")
+
+ggplot(longSimulation, aes(x = avg_FH, y = num_people_affected, color = Type)) + 
+  geom_point(alpha = 0.7) + 
+  geom_smooth(method = "lm", se = FALSE) + 
+  facet_wrap(~Type) + 
+  labs(title = "Observed vs Simulated Data",
+       subtitle = "Average Plane Crash Affectees",
+       x = "Average Freedom Index",
+       y = "
+  theme_minimal()
+```
 

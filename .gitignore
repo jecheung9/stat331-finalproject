@@ -2,3 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
+stat331-finalproject.Rproj
+*.Rproj
+*.html
+.DS_Store
+aaaaa_files/*
+
