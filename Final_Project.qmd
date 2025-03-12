@@ -9,7 +9,6 @@ format:
     code-fold: true
     html-table-processing: none
 editor: source
-bibilography: references.bib
 execute: 
   error: true
   echo: true
@@ -34,7 +33,6 @@ library(tidyverse)
 library(knitr)
 library(kableExtra)
 library(broom)
-library(bibtex)
 planeCrashAffected <- read.csv("PlaneCrashAffected_AnnualNumber.csv")
 FH <- read.csv("freedix_fh.csv")
 ```
